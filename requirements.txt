@@ -1,0 +1,6 @@
+paramiko
+requests
+socket
+dnspython
+pytest
+subprocess
