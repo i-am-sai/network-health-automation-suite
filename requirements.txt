@@ -1,6 +1,4 @@
-paramiko
-requests
-socket
 dnspython
+requests
 pytest
-subprocess
+paramiko
