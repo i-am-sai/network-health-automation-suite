@@ -6,6 +6,8 @@ import pytest
 import paramiko
 import subprocess
 import platform
+import os
+
 
 URLS = [
 "https://www.ebooks.heart.org"
@@ -146,21 +148,23 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-# @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-#     ("var_IP", "ubuntu", "/home/sai/.ssh/network_health_key.pem", "nginx")
-# ])
-# def test_nginx_service_running(hostname, username, key_path, service_name):
+KEY_PATH = os.environ.get("EC2_KEY_PATH", "/home/sai/.ssh/network_health_key.pem")
 
-#     status = check_service_via_ssh(
-#         hostname=hostname,
-#         username=username,
-#         key_path=key_path,
-#         service_name=service_name
-#     )
+@pytest.mark.parametrize("hostname,username,key_path,service_name", [
+    ("13.220.16.210", "ubuntu", KEY_PATH, "nginx")
+])
+def test_nginx_service_running(hostname, username, key_path, service_name):
 
-#     assert status == "active", (
-#         f"{service_name} is not active, status: {status}"
-#     )
+    status = check_service_via_ssh(
+        hostname=hostname,
+        username=username,
+        key_path=key_path,
+        service_name=service_name
+    )
+
+    assert status == "active", (
+        f"{service_name} is not active, status: {status}"
+    )
 
 
 
