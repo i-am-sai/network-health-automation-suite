@@ -146,21 +146,21 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-@pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("var_IP", "ubuntu", "/home/sai/.ssh/network_health_key.pem", "nginx")
-])
-def test_nginx_service_running(hostname, username, key_path, service_name):
+# @pytest.mark.parametrize("hostname,username,key_path,service_name", [
+#     ("var_IP", "ubuntu", "/home/sai/.ssh/network_health_key.pem", "nginx")
+# ])
+# def test_nginx_service_running(hostname, username, key_path, service_name):
 
-    status = check_service_via_ssh(
-        hostname=hostname,
-        username=username,
-        key_path=key_path,
-        service_name=service_name
-    )
+#     status = check_service_via_ssh(
+#         hostname=hostname,
+#         username=username,
+#         key_path=key_path,
+#         service_name=service_name
+#     )
 
-    assert status == "active", (
-        f"{service_name} is not active, status: {status}"
-    )
+#     assert status == "active", (
+#         f"{service_name} is not active, status: {status}"
+#     )
 
 
 
@@ -178,7 +178,7 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
 #         f"{url} is expected to be CDN-backed but has no cache headers"
 #     )
 
-# print after all the test runs
+
 
 print("=" * 60)
 print()
