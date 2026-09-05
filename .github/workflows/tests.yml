@@ -32,3 +32,11 @@ jobs:
 
       - name: Run pytest suite
         run: pytest -v -s -ra
+
+      - name: Upload test log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_number }}
+          path: reports/logs/*.log
+          retention-days: 30
