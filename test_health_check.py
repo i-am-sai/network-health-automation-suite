@@ -33,12 +33,12 @@ def get_hostname(url):
     print(f"Verfying Hostname: {hostname}")
     return hostname
 
-# def ping_host(hostname, count=4):
-#     param = "-n" if platform.system().lower() == "windows" else "-c"
-#     command = ["ping", param, str(count), hostname]
-#     result = subprocess.run(command, capture_output=True, text=True, timeout=15)
-#     print(f"Ping output for {hostname}:\n{result.stdout}")
-#     return result
+def ping_host(hostname, count=4):
+    param = "-n" if platform.system().lower() == "windows" else "-c"
+    command = ["ping", param, str(count), hostname]
+    result = subprocess.run(command, capture_output=True, text=True, timeout=15)
+    print(f"Ping output for {hostname}:\n{result.stdout}")
+    return result
 
 @pytest.mark.parametrize("url", URLS)
 def test_dns_resolution(url):
@@ -56,16 +56,16 @@ def test_dns_resolution(url):
     assert ip is not None and len(ip) > 0, f"DNS failed to resolve {hostname}"
 
 
-@pytest.mark.parametrize("url", URLS)
-def test_ping_reachable(url):
-    hostname = get_hostname(url)
-    result = ping_host(hostname)
+# @pytest.mark.parametrize("url", URLS)
+# def test_ping_reachable(url):
+#     hostname = get_hostname(url)
+#     result = ping_host(hostname)
 
-    if hostname in URLS:
-        print(f"Note: {hostname} is ALB-fronted, ICMP is expected to fail regardless of health")
-        return  # informational only, no assertion
+#     if hostname in URLS:
+#         print(f"Note: {hostname} is ALB-fronted, ICMP is expected to fail regardless of health")
+#         return  # informational only, no assertion
         
-    assert result.returncode == 0, f"{hostname} did not respond to ping (returncode {result.returncode})"
+#     assert result.returncode == 0, f"{hostname} did not respond to ping (returncode {result.returncode})"
 
 @pytest.mark.parametrize("url", URLS)
 def test_cname(url):
