@@ -38,5 +38,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.run_number }}
-          path: reports/logs/*.log
+          path: reports/*.log
           retention-days: 30
