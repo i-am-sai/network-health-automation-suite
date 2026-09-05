@@ -171,6 +171,7 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
         service_name=service_name
     )
     logger.info("nginx service status: %s", status)    
+    logger.info("SSH check completed for %s on %s", service_name, hostname, username)
 
     assert status == "active", (
         f"{service_name} is not active, status: {status}"
