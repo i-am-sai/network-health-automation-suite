@@ -7,10 +7,10 @@ import paramiko
 import subprocess
 import platform
 import os
-
+from utils import logger
 
 URLS = [
-"https://www.ebooks.heart.org"
+"https://www.zappos.com"
 ]
 
 # Hosts known to sit behind infrastructure that blocks ICMP (AWS ALB, some WAFs)
@@ -29,7 +29,6 @@ headers = {
                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-
 def get_hostname(url):
     hostname = url.replace("https://", "").replace("http://", "").split("/")[0]
     print(f"Verfying Hostname: {hostname}")
@@ -42,16 +41,19 @@ def ping_host(hostname, count=4):
     print(f"Ping output for {hostname}:\n{result.stdout}")
     return result
 
+  
+
 @pytest.mark.parametrize("url", URLS)
 def test_dns_resolution(url):
     # DNS resolution
+    logger.info("Test Case 1: DNS Resolution")  
     hostname = get_hostname(url)
 
     try:
         start = time.time()
         ip = socket.gethostbyname(hostname)
         dns_time =(time.time() - start) * 1000
-        print(f"DNS Resolved: {hostname} -> {ip} in ({dns_time:.2f} ms)")
+        logger.info(f"DNS Resolved: {hostname} -> {ip} in ({dns_time:.2f} ms)")
     except socket.gaierror as e:
         pytest.fail(f"DNS resolution failed for {hostname}: {e}")
     
@@ -69,14 +71,16 @@ def test_dns_resolution(url):
         
 #     assert result.returncode == 0, f"{hostname} did not respond to ping (returncode {result.returncode})"
 
+  
 @pytest.mark.parametrize("url", URLS)
 def test_cname(url):
     # CNAME chain + TTL via dnspython
+    logger.info("Test Case 2: CNAME Chain and TTL")  
     hostname = get_hostname(url)
     try:
         answers = dns.resolver.resolve(hostname, "CNAME")
         for rdata in answers:
-            print(f"CNAME record: {rdata.target} (TTL: {answers.rrset.ttl}s)")
+            logger.info(f"CNAME record: {rdata.target} (TTL: {answers.rrset.ttl}s)")
     except dns.resolver.NoAnswer:
         pytest.fail(f"CNAME: none (resolves directly, no CDN alias)")
     except Exception as e:
@@ -84,9 +88,11 @@ def test_cname(url):
 
     assert answers is not None and len(answers) > 0, f"CNAME not found for {hostname}"
 
+ 
 TCP_CONNECT_SLA_MS = 1000
 @pytest.mark.parametrize("url", URLS)
 def test_tcp_connect(url): 
+    logger.info("Test Case 3: TCP Connect")   
     hostname = get_hostname(url)
     # Raw TCP connect timing
     try:
@@ -95,28 +101,30 @@ def test_tcp_connect(url):
         sock = socket.create_connection((ip, 443), timeout=5)
         tcp_time = (time.time() - start) * 1000
         sock.close()
-        print(f"TCP Connect: {ip}:443 in ({tcp_time:.2f} ms)")
+        logger.info(f"TCP Connect: {ip}:443 in ({tcp_time:.2f} ms)")
     except (socket.timeout, ConnectionRefusedError, OSError) as e:
         pytest.fail(f"TCP connect FAILED: {e}")
     assert tcp_time < TCP_CONNECT_SLA_MS, (
         f"TCP connect to {hostname} took {tcp_time:.2f} ms, exceeds {TCP_CONNECT_SLA_MS} ms SLA"
     )
 
+  
 RESPONSE_TIME_SLA_MS = 5000
 @pytest.mark.parametrize("url", URLS)
 def test_http_request(url): 
+    logger.info("Test Case 4: HTTP Request")  
     hostname = get_hostname(url)
     try:
         response = requests.get(url, timeout=10, headers=headers)
         http_time = response.elapsed.total_seconds() * 1000
-        print(f"HTTP response time: {http_time:.2f} ms")
-        print(f"HTTP Status Code: {response.status_code}")
+        logger.info(f"HTTP response time: {http_time:.2f} ms")
+        logger.info(f"HTTP Status Code: {response.status_code}")
         
-        print("Response Headers:")
+        logger.info("Response Headers:")
         cache_control = response.headers.get("Cache-Control", "Not present")
         server_timing = response.headers.get("Server-Timing", "Not present")
-        print(f"Cache-Control: {cache_control}")
-        print(f"Server-Timing: {server_timing}")
+        logger.info(f"Cache-Control: {cache_control}")
+        logger.info(f"Server-Timing: {server_timing}")
 
     except requests.exceptions.RequestException as e:
         pytest.fail(f"HTTP request failed: {e}")
@@ -148,12 +156,13 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-KEY_PATH = os.environ.get("EC2_KEY_PATH", "/home/sai/.ssh/network_health_key.pem")
-
+KEY_PATH = "ec2_key.pem"
+   
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("13.220.16.210", "ubuntu", KEY_PATH, "nginx")
+    ("13.220.16.210", "ubuntu", "ec2_key.pem", "nginx")
 ])
 def test_nginx_service_running(hostname, username, key_path, service_name):
+    logger.info("Test Case 5: SSH Service Check") 
 
     status = check_service_via_ssh(
         hostname=hostname,
@@ -161,6 +170,7 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
         key_path=key_path,
         service_name=service_name
     )
+    logger.info("nginx service status: %s", status)    
 
     assert status == "active", (
         f"{service_name} is not active, status: {status}"
