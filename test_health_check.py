@@ -12,6 +12,8 @@ from datetime import datetime # directly import datetime for timestamping
 from utils.logger import logger
 from utils.report import test_results, record_result
 from reports_upload_script import upload_report_to_s3
+from pathlib import Path
+
 
 URLS = [
 "https://www.zappos.com"
@@ -208,6 +210,8 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
 @pytest.fixture(scope="session", autouse=True)
 def write_json_report():
     yield
+    reports_dir = Path("reports/results")
+    reports_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     filename = f"reports/results/results_{timestamp}.json"
     with open(filename, "w") as f:
