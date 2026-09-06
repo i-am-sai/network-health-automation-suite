@@ -20,4 +20,5 @@ __pycache__/
 .DS_Store
 
 reports/logs/
+reports/results/
 *.log

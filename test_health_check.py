@@ -7,7 +7,11 @@ import paramiko
 import subprocess
 import platform
 import os
-from utils import logger
+import json
+from datetime import datetime # directly import datetime for timestamping
+from utils.logger import logger
+from utils.report import test_results, record_result
+from reports_upload_script import upload_report_to_s3
 
 URLS = [
 "https://www.zappos.com"
@@ -54,7 +58,9 @@ def test_dns_resolution(url):
         ip = socket.gethostbyname(hostname)
         dns_time =(time.time() - start) * 1000
         logger.info(f"DNS Resolved: {hostname} -> {ip} in ({dns_time:.2f} ms)")
+        record_result("test_dns_resolution", url, "passed", dns_time, {"ip": ip})
     except socket.gaierror as e:
+        record_result("test_dns_resolution", url, "failed", 0, {"error": str(e)})
         pytest.fail(f"DNS resolution failed for {hostname}: {e}")
     
     assert ip is not None and len(ip) > 0, f"DNS failed to resolve {hostname}"
@@ -81,10 +87,13 @@ def test_cname(url):
         answers = dns.resolver.resolve(hostname, "CNAME")
         for rdata in answers:
             logger.info(f"CNAME record: {rdata.target} (TTL: {answers.rrset.ttl}s)")
+            record_result("test_cname", url, "passed", 0, {"cname": str(rdata.target), "ttl": answers.rrset.ttl})
     except dns.resolver.NoAnswer:
         pytest.fail(f"CNAME: none (resolves directly, no CDN alias)")
+        record_result("test_cname", url, "failed", 0, {"error": "No CNAME record found"})
     except Exception as e:
         pytest.fail(f"CNAME lookup skipped: {e}")
+        record_result("test_cname", url, "failed", 0, {"error": str(e)})
 
     assert answers is not None and len(answers) > 0, f"CNAME not found for {hostname}"
 
@@ -102,8 +111,11 @@ def test_tcp_connect(url):
         tcp_time = (time.time() - start) * 1000
         sock.close()
         logger.info(f"TCP Connect: {ip}:443 in ({tcp_time:.2f} ms)")
+        record_result("test_tcp_connect", url, "passed", tcp_time, {"ip": ip})
+        
     except (socket.timeout, ConnectionRefusedError, OSError) as e:
         pytest.fail(f"TCP connect FAILED: {e}")
+        record_result("test_tcp_connect", url, "failed", 0, {"error": str(e)})
     assert tcp_time < TCP_CONNECT_SLA_MS, (
         f"TCP connect to {hostname} took {tcp_time:.2f} ms, exceeds {TCP_CONNECT_SLA_MS} ms SLA"
     )
@@ -119,15 +131,20 @@ def test_http_request(url):
         http_time = response.elapsed.total_seconds() * 1000
         logger.info(f"HTTP response time: {http_time:.2f} ms")
         logger.info(f"HTTP Status Code: {response.status_code}")
+        record_result("test_http_request", url, "passed", http_time, {"status_code": response.status_code})
         
         logger.info("Response Headers:")
         cache_control = response.headers.get("Cache-Control", "Not present")
         server_timing = response.headers.get("Server-Timing", "Not present")
+    
         logger.info(f"Cache-Control: {cache_control}")
+        record_result("test_http_request", url, "passed", http_time, {"Cache-Control": cache_control})
         logger.info(f"Server-Timing: {server_timing}")
+        record_result("test_http_request", url, "passed", http_time, {"Server-Timing": server_timing})
 
     except requests.exceptions.RequestException as e:
         pytest.fail(f"HTTP request failed: {e}")
+        record_result("test_http_request", url, "failed", 0, {"error": str(e)})
 
     assert response.status_code < 400, f"{url} returned {response.status_code}"
     assert http_time < RESPONSE_TIME_SLA_MS, (
@@ -157,9 +174,10 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
         client.close()
 
 KEY_PATH = "ec2_key.pem"
+KEY_PATH_Local = "/home/sai/.ssh/network_health_key.pem"
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("13.220.16.210", "ubuntu", "ec2_key.pem", "nginx")
+    ("3.237.26.61", "ubuntu", "ec2_key.pem", "nginx")
 ])
 def test_nginx_service_running(hostname, username, key_path, service_name):
     logger.info("Test Case 5: SSH Service Check") 
@@ -171,12 +189,31 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
         service_name=service_name
     )
     logger.info("nginx service status: %s", status)    
+    record_result("test_nginx_service_running", hostname, "passed", 0, {"service_status": status})
 
     assert status == "active", (
         f"{service_name} is not active, status: {status}"
     )
 
 
+# @pytest.fixture(scope="session", autouse=True)
+# def write_json_report():
+#     yield  # all tests run first
+#     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+#     filename = f"reports/results/results_{timestamp}.json"
+#     with open(filename, "w") as f:
+#         json.dump(test_results, f, indent=2)
+#     print(f"\nJSON report written to {filename}")
+
+@pytest.fixture(scope="session", autouse=True)
+def write_json_report():
+    yield
+    timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    filename = f"reports/results/results_{timestamp}.json"
+    with open(filename, "w") as f:
+        json.dump(test_results, f, indent=2)
+    logger.info(f"\nJSON report written to {filename}")
+    upload_report_to_s3()
 
 
 # CDN_URLS = [
@@ -194,5 +231,3 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
 
 
 
-print("=" * 60)
-print()

@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Networking/reports/   
-reports_dir = Path("reports")
+reports_dir = Path("reports/logs")
 reports_dir.mkdir(parents=True, exist_ok=True)
 
 # Networking/reports/test.log

@@ -24,13 +24,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-
       - name: Write SSH key
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 400 ec2_key.pem
 
       - name: Run pytest suite
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EC2_KEY_PATH: ${{ secrets.EC2_SSH_KEY }}
         run: pytest -v -s -ra
 
       - name: Upload test log as artifact
@@ -38,5 +41,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.run_number }}
-          path: reports/*.log
+          path: reports/logs/*.log
           retention-days: 30
