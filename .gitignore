@@ -12,6 +12,7 @@ __pycache__/
 *.pem
 *.key
 .env
+*.csv
 
 # IDE
 .vscode/
