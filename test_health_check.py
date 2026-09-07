@@ -217,7 +217,7 @@ def write_json_report():
     with open(filename, "w") as f:
         json.dump(test_results, f, indent=2)
     logger.info(f"\nJSON report written to {filename}")
-    upload_report_to_s3()
+    upload_report_to_s3(filename)
 
 
 # CDN_URLS = [
