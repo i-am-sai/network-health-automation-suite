@@ -9,7 +9,7 @@ RESULTS_DIR = "reports/results"
 boto3.set_stream_logger("boto3", logging.DEBUG)
 boto3.set_stream_logger("botocore", logging.DEBUG)
 
-def upload_report_to_s3(bucket_name=BUCKET_NAME):
+def upload_report_to_s3(local_file_path, bucket_name=BUCKET_NAME):
     s3 = boto3.client("s3")
 
     if not os.path.isdir(RESULTS_DIR):
@@ -29,10 +29,10 @@ def upload_report_to_s3(bucket_name=BUCKET_NAME):
         return False
 
     # Pick the most recently generated/modified JSON file
-    local_file_path = max(json_files, key=os.path.getmtime)
+    # local_file_path = max(json_files, key=os.path.getmtime)
 
     filename = os.path.basename(local_file_path)
-
+    
     # S3 destination
     s3_key = f"reports/{filename}"
 
@@ -54,4 +54,4 @@ def upload_report_to_s3(bucket_name=BUCKET_NAME):
 
 
 if __name__ == "__main__":
-    upload_report_to_s3()
+    upload_report_to_s3("reports/results/latest_report.json")

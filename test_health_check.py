@@ -179,7 +179,7 @@ KEY_PATH = "ec2_key.pem"
 KEY_PATH_Local = "/home/sai/.ssh/network_health_key.pem"
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("3.237.26.61", "ubuntu", "ec2_key.pem", "nginx")
+    ("44.200.22.192", "ubuntu", "ec2_key.pem", "nginx")
 ])
 def test_nginx_service_running(hostname, username, key_path, service_name):
     logger.info("Test Case 5: SSH Service Check") 
