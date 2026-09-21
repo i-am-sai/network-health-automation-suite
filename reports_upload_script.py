@@ -1,10 +1,12 @@
 import boto3
 import os
 import logging
+from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
 BUCKET_NAME = "network-health-automation-reports"
 RESULTS_DIR = "reports/results"
+load_dotenv()
 
 boto3.set_stream_logger("boto3", logging.DEBUG)
 boto3.set_stream_logger("botocore", logging.DEBUG)

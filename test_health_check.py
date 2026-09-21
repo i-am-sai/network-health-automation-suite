@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 URLS = [
-"https://www.zappos.com"
+    "https://www.ebooks.heart.org"
 ]
 
 # Hosts known to sit behind infrastructure that blocks ICMP (AWS ALB, some WAFs)
@@ -179,7 +179,7 @@ KEY_PATH = "ec2_key.pem"
 KEY_PATH_Local = "/home/sai/.ssh/network_health_key.pem"
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("44.200.22.192", "ubuntu", "ec2_key.pem", "nginx")
+    ("3.236.241.172", "ubuntu", "ec2_key.pem", "nginx")
 ])
 def test_nginx_service_running(hostname, username, key_path, service_name):
     logger.info("Test Case 5: SSH Service Check") 
