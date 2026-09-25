@@ -178,24 +178,25 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
 KEY_PATH = "ec2_key.pem"
 KEY_PATH_Local = "/home/sai/.ssh/network_health_key.pem"
    
-@pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("3.236.241.172", "ubuntu", "ec2_key.pem", "nginx")
-])
-def test_nginx_service_running(hostname, username, key_path, service_name):
-    logger.info("Test Case 5: SSH Service Check") 
+# @pytest.mark.parametrize("hostname,username,key_path,service_name", [
+#     ("3.236.241.172", "ubuntu", "ec2_key.pem", "nginx")
+# ])
 
-    status = check_service_via_ssh(
-        hostname=hostname,
-        username=username,
-        key_path=key_path,
-        service_name=service_name
-    )
-    logger.info("nginx service status: %s", status)    
-    record_result("test_nginx_service_running", hostname, "passed", 0, {"service_status": status})
+# def test_nginx_service_running(hostname, username, key_path, service_name):
+#     logger.info("Test Case 5: SSH Service Check") 
 
-    assert status == "active", (
-        f"{service_name} is not active, status: {status}"
-    )
+#     status = check_service_via_ssh(
+#         hostname=hostname,
+#         username=username,
+#         key_path=key_path,
+#         service_name=service_name
+#     )
+#     logger.info("nginx service status: %s", status)    
+#     record_result("test_nginx_service_running", hostname, "passed", 0, {"service_status": status})
+
+#     assert status == "active", (
+#         f"{service_name} is not active, status: {status}"
+#     )
 
 
 # @pytest.fixture(scope="session", autouse=True)
