@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 URLS = [
-    "https://eaccess.heart.org/"
+    "https://prodsaptc.eu.learning.laerdal.com/"
 ]
 
 # Hosts known to sit behind infrastructure that blocks ICMP (AWS ALB, some WAFs)
