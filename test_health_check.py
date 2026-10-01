@@ -176,10 +176,17 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
         client.close()
 
 KEY_PATH = "ec2_key.pem"
-KEY_PATH_Local = "/home/sai/.ssh/network_health_key.pem"
+
+EC2_PUBLIC_IP = "3.234.252.46"
+DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
+EC2_USER = "ubuntu"
+
+SSH_KEY_PATH = os.environ.get("EC2_KEY_PATH", DEFAULT_KEY_PATH)
+SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
+SSH_USER = os.environ.get("EC2_USER", "ubuntu")
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-    ("32.198.62.247", "ubuntu", "ec2_key.pem", "nginx")
+    (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
 ])
 
 def test_nginx_service_running(hostname, username, key_path, service_name):
