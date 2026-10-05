@@ -176,8 +176,7 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
         client.close()
 
 KEY_PATH = "ec2_key.pem"
-
-EC2_PUBLIC_IP = "100.31.135.4"
+EC2_PUBLIC_IP = "44.197.112.241"
 DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
