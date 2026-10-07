@@ -181,7 +181,7 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
         client.close()
 
 KEY_PATH = "ec2_key.pem"
-EC2_PUBLIC_IP = "44.197.112.241"
+EC2_PUBLIC_IP = "44.200.140.11"
 DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
@@ -189,35 +189,26 @@ SSH_KEY_PATH = os.environ.get("EC2_KEY_PATH", DEFAULT_KEY_PATH)
 SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 SSH_USER = os.environ.get("EC2_USER", "ubuntu")
    
-# @pytest.mark.parametrize("hostname,username,key_path,service_name", [
-#     (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
-# ])
+@pytest.mark.parametrize("hostname,username,key_path,service_name", [
+    (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
+])
 
-# def test_nginx_service_running(hostname, username, key_path, service_name):
-#     logger.info("Test Case 5: SSH Service Check") 
+def test_nginx_service_running(hostname, username, key_path, service_name):
+    logger.info("Test Case 5: SSH Service Check") 
 
-#     status = check_service_via_ssh(
-#         hostname=hostname,
-#         username=username,
-#         key_path=key_path,
-#         service_name=service_name
-#     )
-#     logger.info("nginx service status: %s", status)    
-#     record_result("test_nginx_service_running", hostname, "passed", 0, {"service_status": status})
+    status = check_service_via_ssh(
+        hostname=hostname,
+        username=username,
+        key_path=key_path,
+        service_name=service_name
+    )
+    logger.info("nginx service status: %s", status)    
+    record_result("test_nginx_service_running", hostname, "passed", 0, {"service_status": status})
 
-#     assert status == "active", (
-#         f"{service_name} is not active, status: {status}"
-#     )
+    assert status == "active", (
+        f"{service_name} is not active, status: {status}"
+    )
 
-
-# @pytest.fixture(scope="session", autouse=True)
-# def write_json_report():
-#     yield  # all tests run first
-#     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-#     filename = f"reports/results/results_{timestamp}.json"
-#     with open(filename, "w") as f:
-#         json.dump(test_results, f, indent=2)
-#     print(f"\nJSON report written to {filename}")
 
 
 @pytest.fixture(scope="session", autouse=True)
