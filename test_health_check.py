@@ -186,8 +186,8 @@ DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
 SSH_KEY_PATH = os.environ.get("EC2_KEY_PATH", DEFAULT_KEY_PATH)
-SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
-SSH_USER = os.environ.get("EC2_USER", "ubuntu")
+# SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
+# SSH_USER = os.environ.get("EC2_USER", "ubuntu")
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
     (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
