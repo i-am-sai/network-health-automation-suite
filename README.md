@@ -208,6 +208,3 @@ Cron uses the virtualenv's own binaries by full path, because cron runs with a m
 ## Author
 
 **Sai Swaroop**
-QA Engineer transitioning to SDET / Network Automation
-
-LinkedIn: `<your-linkedin-url>`
