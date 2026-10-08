@@ -15,6 +15,7 @@ from reports_upload_script import upload_report_to_s3
 from pathlib import Path
 from email_script import send_report_email
 from dotenv import load_dotenv
+import ssl
 
 load_dotenv()
 
@@ -180,14 +181,59 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
+TLS_HOST = "44.200.107.162"
+TLS_PORT = 443
+
+
+def test_ssl_certificate():
+    logger.info("Test Case 5: SSL Certificate Validation")
+
+    try:
+        start = time.time()
+
+        certificate = ssl.get_server_certificate(
+            (TLS_HOST, TLS_PORT)
+        )
+
+        tls_time = (time.time() - start) * 1000
+
+        logger.info("SSL certificate retrieved successfully")
+        logger.info(f"Certificate:\n{certificate}")
+
+        record_result(
+            "test_ssl_certificate",
+            f"{TLS_HOST}:{TLS_PORT}",
+            "passed",
+            tls_time,
+            {
+                "certificate_retrieved": True
+            }
+        )
+
+        assert certificate.startswith(
+            "-----BEGIN CERTIFICATE-----"
+        )
+
+    except Exception as e:
+        record_result(
+            "test_ssl_certificate",
+            f"{TLS_HOST}:{TLS_PORT}",
+            "failed",
+            0,
+            {"error": str(e)}
+        )
+
+        pytest.fail(f"SSL certificate retrieval failed: {e}")
+
+
 KEY_PATH = "ec2_key.pem"
-EC2_PUBLIC_IP = "44.200.140.1"
+EC2_PUBLIC_IP = "44.200.107.162"
 DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
 SSH_KEY_PATH = os.environ.get("EC2_KEY_PATH", DEFAULT_KEY_PATH)
-# SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
-# SSH_USER = os.environ.get("EC2_USER", "ubuntu")
+SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
+SSH_USER = os.environ.get("EC2_USER", "ubuntu")
    
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
     (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
