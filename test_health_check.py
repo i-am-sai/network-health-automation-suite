@@ -181,7 +181,8 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-TLS_HOST = "44.200.107.162"
+EC2_PUBLIC_IP = "44.200.107.162"
+SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 TLS_PORT = 443
 
 #Test Case 5: SSL Certificate Validation
@@ -192,7 +193,7 @@ def test_ssl_certificate():
         start = time.time()
 
         certificate = ssl.get_server_certificate(
-            (TLS_HOST, TLS_PORT)
+            (SSH_HOST, TLS_PORT)
         )
 
         tls_time = (time.time() - start) * 1000
@@ -202,7 +203,7 @@ def test_ssl_certificate():
 
         record_result(
             "test_ssl_certificate",
-            f"{TLS_HOST}:{TLS_PORT}",
+            f"{SSH_HOST}:{TLS_PORT}",
             "passed",
             tls_time,
             {
@@ -217,7 +218,7 @@ def test_ssl_certificate():
     except Exception as e:
         record_result(
             "test_ssl_certificate",
-            f"{TLS_HOST}:{TLS_PORT}",
+            f"{SSH_HOST}:{TLS_PORT}",
             "failed",
             0,
             {"error": str(e)}
