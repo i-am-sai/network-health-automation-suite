@@ -5,7 +5,7 @@ import requests
 import pytest
 import paramiko
 import subprocess
-import platform
+# import platform
 import os
 import json
 from datetime import datetime # directly import datetime for timestamping
@@ -25,7 +25,6 @@ URLS = [
 RECIPIENT = os.environ.get("RECIPIENT_EMAIL")
 
 
-# Hosts known to sit behind infrastructure that blocks ICMP (AWS ALB, some WAFs)
 # PING_UNRELIABLE_HOSTS = ["www.ebooks.heart.org"]
 
 # # CDN Hosted URLS:
@@ -53,8 +52,7 @@ def ping_host(hostname, count=4):
     print(f"Ping output for {hostname}:\n{result.stdout}")
     return result
 
-  
-
+# Test Case 1: DNS Resolution
 @pytest.mark.parametrize("url", URLS)
 def test_dns_resolution(url):
     # DNS resolution
@@ -85,7 +83,8 @@ def test_dns_resolution(url):
         
 #     assert result.returncode == 0, f"{hostname} did not respond to ping (returncode {result.returncode})"
 
-  
+
+#Test Case 2: CNAME Chain and TTL
 @pytest.mark.parametrize("url", URLS)
 def test_cname(url):
     # CNAME chain + TTL via dnspython
@@ -106,6 +105,7 @@ def test_cname(url):
     assert answers is not None and len(answers) > 0, f"CNAME not found for {hostname}"
 
  
+# Test Case 3: TCP Connect
 TCP_CONNECT_SLA_MS = 1000
 @pytest.mark.parametrize("url", URLS)
 def test_tcp_connect(url): 
@@ -128,7 +128,7 @@ def test_tcp_connect(url):
         f"TCP connect to {hostname} took {tcp_time:.2f} ms, exceeds {TCP_CONNECT_SLA_MS} ms SLA"
     )
 
-  
+#Test Case 4: HTTP Request
 RESPONSE_TIME_SLA_MS = 5000
 @pytest.mark.parametrize("url", URLS)
 def test_http_request(url): 
@@ -184,7 +184,7 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
 TLS_HOST = "44.200.107.162"
 TLS_PORT = 443
 
-
+#Test Case 5: SSL Certificate Validation
 def test_ssl_certificate():
     logger.info("Test Case 5: SSL Certificate Validation")
 
@@ -234,7 +234,8 @@ EC2_USER = "ubuntu"
 SSH_KEY_PATH = os.environ.get("EC2_KEY_PATH", DEFAULT_KEY_PATH)
 SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 SSH_USER = os.environ.get("EC2_USER", "ubuntu")
-   
+
+#Test Case 6: SSH Service Check
 @pytest.mark.parametrize("hostname,username,key_path,service_name", [
     (SSH_HOST, SSH_USER, SSH_KEY_PATH, "nginx")
 ])
@@ -256,7 +257,7 @@ def test_nginx_service_running(hostname, username, key_path, service_name):
     )
 
 
-
+# Fixture to write JSON report locally and send to S3 after all tests have run
 @pytest.fixture(scope="session", autouse=True)
 def write_json_report():
     yield
@@ -268,13 +269,10 @@ def write_json_report():
         json.dump(test_results, f, indent=2)
     logger.info(f"\nJSON report written to {filename}")
     upload_report_to_s3(filename)
-
     # send_report_email(filename, RECIPIENT)
 
 
-# CDN_URLS = [
-#     "https://www.zappos.com",
-# ]
+
 
 # @pytest.mark.parametrize("url", CDN_URLS)
 # def test_cache_header_present_on_cdn_sites(url):
