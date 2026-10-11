@@ -181,7 +181,7 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-EC2_PUBLIC_IP = "44.200.107.162"
+EC2_PUBLIC_IP = "98.80.97.143"
 SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 TLS_PORT = 443
 
@@ -228,7 +228,6 @@ def test_ssl_certificate():
 
 
 KEY_PATH = "ec2_key.pem"
-EC2_PUBLIC_IP = "98.92.104.29"
 DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
