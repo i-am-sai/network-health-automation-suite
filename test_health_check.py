@@ -20,7 +20,7 @@ import ssl
 load_dotenv()
 
 URLS = [
-    "https://eaccess.heart.org/"
+    "https://ebooks.heart.org/"
 ]
 RECIPIENT = os.environ.get("RECIPIENT_EMAIL")
 
@@ -228,7 +228,7 @@ def test_ssl_certificate():
 
 
 KEY_PATH = "ec2_key.pem"
-EC2_PUBLIC_IP = "44.200.107.162"
+EC2_PUBLIC_IP = "98.92.104.29"
 DEFAULT_KEY_PATH = "/home/sai/.ssh/network_health_key.pem"
 EC2_USER = "ubuntu"
 
