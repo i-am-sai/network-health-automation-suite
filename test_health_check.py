@@ -20,7 +20,7 @@ import ssl
 load_dotenv()
 
 URLS = [
-    "https://eaccess.heart.org/"
+    "https://ebooks.heart.org/"
 ]
 RECIPIENT = os.environ.get("RECIPIENT_EMAIL")
 
