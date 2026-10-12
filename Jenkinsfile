@@ -6,11 +6,11 @@
     }
     stages {
         stage('Checkout') {
-  steps {
-    script {
-      def scmVars = checkout scm
-      env.BRANCH_REF = scmVars.GIT_BRANCH
-      echo "Building branch: ${env.BRANCH_REF}"
+         steps {
+         script {
+           def scmVars = checkout scm
+           env.BRANCH_REF = scmVars.GIT_BRANCH
+           echo "Building branch: ${env.BRANCH_REF}"
     }
   }
 }
@@ -89,3 +89,4 @@
         }
      }
     }
+}
