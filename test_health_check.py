@@ -181,7 +181,7 @@ def check_service_via_ssh(hostname, username, key_path, service_name):
     finally:
         client.close()
 
-EC2_PUBLIC_IP = "98.80.97.143"
+EC2_PUBLIC_IP = "44.221.81.93"
 SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 TLS_PORT = 443
 

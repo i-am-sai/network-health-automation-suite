@@ -6,8 +6,14 @@
     }
     stages {
         stage('Checkout') {
-        steps { checkout scm }
-        }
+  steps {
+    script {
+      def scmVars = checkout scm
+      env.BRANCH_REF = scmVars.GIT_BRANCH
+      echo "Building branch: ${env.BRANCH_REF}"
+    }
+  }
+}
 
         stage('Build image') {
         steps { sh 'docker build -t ${IMAGE}:build-${BUILD_NUMBER} .' }
@@ -41,19 +47,28 @@
         }
 
         stage('Push to GHCR') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'ghcr-creds', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
-            sh '''
-                echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
-                docker push ${IMAGE}:build-${BUILD_NUMBER}
-                docker tag ${IMAGE}:build-${BUILD_NUMBER} ${IMAGE}:latest
-                docker push ${IMAGE}:latest
-            '''
-            }
+  steps {
+    withCredentials([usernamePassword(credentialsId: 'ghcr-creds', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
+      sh '''
+        echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
+        docker push ${IMAGE}:build-${BUILD_NUMBER}
+      '''
+      script {
+        if (env.BRANCH_REF == 'origin/main') {
+          sh '''
+            docker tag ${IMAGE}:build-${BUILD_NUMBER} ${IMAGE}:latest
+            docker push ${IMAGE}:latest
+          '''
         }
-        }
+      }
+    }
+  }
+}
 
         stage('Deploy to EC2') {
+            when { 
+                expression { env.BRANCH_REF == 'origin/main' 
+                }
         steps {
             withCredentials([
             string(credentialsId: 'ec2-host', variable: 'EC2_HOST'),
