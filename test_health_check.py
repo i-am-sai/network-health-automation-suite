@@ -269,7 +269,7 @@ def write_json_report():
         json.dump(test_results, f, indent=2)
     logger.info(f"\nJSON report written to {filename}")
     upload_report_to_s3(filename)
-    # send_report_email(filename, RECIPIENT)
+    send_report_email(filename, RECIPIENT)
 
 
 
