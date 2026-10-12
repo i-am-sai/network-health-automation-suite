@@ -12,13 +12,16 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            steps {
-                script {
-                    checkout scm
-                    echo "Building branch: ${env.BRANCH_NAME}"
-                }
-            }
+           steps {
+             script {
+            def scmVars = checkout scm
+            env.BRANCH_REF = scmVars.GIT_BRANCH
+
+            echo "GIT_BRANCH = ${scmVars.GIT_BRANCH}"
+            echo "BRANCH_REF = ${env.BRANCH_REF}"
         }
+    }
+}
 
         stage('Build image') {
             steps {
@@ -96,7 +99,7 @@ pipeline {
                     '''
 
                     script {
-                        if (env.BRANCH_NAME == 'main') {
+                        if (env.BRANCH_REF == 'origin/main' || env.BRANCH_REF == 'main') {
                             sh '''
                                 docker tag \
                                     ${IMAGE}:build-${BUILD_NUMBER} \
@@ -112,7 +115,10 @@ pipeline {
 
         stage('Deploy to EC2') {
             when {
-                branch 'main'
+                 expression {
+                    env.BRANCH_REF == 'origin/main' ||
+                   env.BRANCH_REF == 'main'
+                   }
             }
 
             steps {
