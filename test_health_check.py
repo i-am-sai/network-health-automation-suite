@@ -64,12 +64,12 @@ def test_ping_reachable(url):
     hostname = get_hostname(url)
     result = ping_host(hostname)
     result_code = result.returncode
-    match = re.search(
-    r"rtt min/avg/max/mdev = [\d.]+/([\d.]+)/[\d.]+/[\d.]+",
-    result.stdout
-    )
+    # match = re.search(
+    # r"rtt min/avg/max/mdev = [\d.]+/([\d.]+)/[\d.]+/[\d.]+",
+    # result.stdout
+    # )
 
-    avg_time = float(match.group(1)) if match else None
+    # avg_time = float(match.group(1)) if match else None
 
     if hostname in ALB_HOSTS:
         logger.info(
@@ -81,7 +81,7 @@ def test_ping_reachable(url):
             "test_ping_reachable",
             url,
             "passed",
-           avg_time,
+           0,
             {"ping_status": result_code, "info": "ICMP check skipped - ALB/CDN-fronted host"}
         )
         return
