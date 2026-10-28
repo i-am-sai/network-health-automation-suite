@@ -4,3 +4,4 @@ pytest
 paramiko
 boto3
 python-dotenv
+subprocess
