@@ -9,6 +9,7 @@ import platform
 import ssl
 import os
 import json
+import re
 from datetime import datetime 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -23,6 +24,10 @@ load_dotenv()
 URLS = [
     "https://www.zappos.com",
 ]
+
+ALB_HOSTS = {
+    "www.zappos.com",
+}
 
 RECIPIENT = os.environ.get("RECIPIENT_EMAIL")
 
@@ -54,17 +59,68 @@ def ping_host(hostname, count=4):
 # Test Case 1: Ping the Server and wait for response using subprocess
 @pytest.mark.parametrize("url", URLS)
 def test_ping_reachable(url):
-    logger.info("Test Case 1: PING Server")  
+    logger.info("Test Case 1: PING Server")
+
     hostname = get_hostname(url)
     result = ping_host(hostname)
     result_code = result.returncode
-    record_result("test_ping_reachable", url, "passed", 0, {"ping_status": result_code})
+    match = re.search(r"rtt min/avg/max/mdev = [\d.]+/([\d.]+)/[\d.]+/[\d.]+", result.stdout)
+    avg_time = float(match.group(1))
 
-    if hostname in URLS:
-        print(f"Note: {hostname} is ALB-fronted, ICMP is expected to fail regardless of health")
-        return  # informational only, no assertion
+    if hostname in ALB_HOSTS:
+        logger.info(
+            f"Note: {hostname} is ALB/CDN-fronted. "
+            "ICMP failure is expected and is treated as informational."
+        )
+
+        record_result(
+            "test_ping_reachable",
+            url,
+            "passed",
+           avg_time,
+            {"ping_status": result_code, "info": "ICMP check skipped - ALB/CDN-fronted host"}
+        )
+        return
+
+    try:
+        assert result_code == 0, (
+            f"{hostname} did not respond to ping "
+            f"(returncode {result_code})"
+        )
+
+    except AssertionError as e:
+        record_result(
+            "test_ping_reachable",
+            url,
+            "failed",
+            0,
+            {"ping_status": result_code}
+        )
+        raise
+
+    else:
+        record_result(
+            "test_ping_reachable",
+            url,
+            "passed",
+            0,
+            {"ping_status": result_code}
+        )
+
+
+# @pytest.mark.parametrize("url", URLS)
+# def test_ping_reachable(url):
+#     logger.info("Test Case 1: PING Server")  
+#     hostname = get_hostname(url)
+#     result = ping_host(hostname)
+#     result_code = result.returncode
+#     record_result("test_ping_reachable", url, "passed", 0, {"ping_status": result_code})
+
+#     if hostname in URLS:
+#         print(f"Note: {hostname} is ALB-fronted, ICMP is expected to fail regardless of health")
+#         return  # informational only, no assertion
         
-    assert result_code == 0, f"{hostname} did not respond to ping (returncode {result_code})"
+#     assert result_code == 0, f"{hostname} did not respond to ping (returncode {result_code})"
 
 
 # Test Case 2: DNS Resolution
