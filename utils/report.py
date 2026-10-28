@@ -13,3 +13,5 @@ def record_result(test_name, url, status, duration_ms, extra=None):
         "timestamp": datetime.now().isoformat(),
         "extra": extra or {}
     })
+
+    return test_results
