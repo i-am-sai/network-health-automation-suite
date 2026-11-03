@@ -10,6 +10,7 @@ import ssl
 import os
 import json
 import re
+import shutil
 from datetime import datetime 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -70,6 +71,8 @@ def test_ping_reachable(url):
     # )
 
     # avg_time = float(match.group(1)) if match else None
+    if shutil.which("ping") is None:
+        pytest.fail("ping binary not installed in this environment")
 
     if hostname in ALB_HOSTS:
         logger.info(
