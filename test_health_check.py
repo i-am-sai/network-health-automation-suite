@@ -200,7 +200,7 @@ def test_tcp_connect(url):
     )
 
 
-EC2_PUBLIC_IP = "3.234.213.48"
+EC2_PUBLIC_IP = "44.200.137.70"
 SSH_HOST = os.environ.get("EC2_SSH_HOST", EC2_PUBLIC_IP)
 TLS_PORT = 443
 
